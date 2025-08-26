@@ -27,6 +27,7 @@ export default function Organization() {
     if (typeof window === 'undefined') return;
 
     const role = localStorage.getItem('role');
+    console.log('User role:', role); //
     // Redirect if not admin (including employee, null/undefined, or visitor)
     if (role !== 'ADMIN') {
       router.replace('/login'); // or '/access-denied' as you prefer

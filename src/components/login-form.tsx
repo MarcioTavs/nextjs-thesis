@@ -1,29 +1,19 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import Link from "next/link";
-import axios from "axios";
+import { useAuth } from "@/components/auth-context"; // Adjust path if needed
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  const router = useRouter();
+export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,28 +22,10 @@ export function LoginForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
     setLoading(true);
-
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
-        {
-          username: email,
-          password,
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      const data = response.data;
-
-      // Successful login
-      localStorage.setItem("token", data.token);
-      router.push("/dashboard"); // Redirect to dashboard (adjust as needed)
+      await login(email, password);
     } catch (err: any) {
-      // Handle errors
       let errorMessage = "An unexpected error occurred.";
       if (err.response) {
         const data = err.response.data;
@@ -137,7 +109,7 @@ export function LoginForm({
           </form>
         </CardContent>
       </Card>
-     <div className="text-muted-foreground text-center text-xs">
+      <div className="text-muted-foreground text-center text-xs">
         By clicking continue, you agree to our{" "}
         {/* <a href="https://ztrackmap.com/terms-and-conditions/" target="_blank">
           Terms of Service

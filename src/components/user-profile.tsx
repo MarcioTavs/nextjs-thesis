@@ -65,7 +65,7 @@ export default function ProfileUpdateForm({ email }: ProfileUpdateFormProps) {
   return (
     <div className="bg-gray-800 rounded-lg shadow-lg p-10 max-w-md w-full text-white flex flex-col gap-6 items-center">
       <Image
-        src="/logo.png" // Replace with your actual logo path
+        src="/logo.png" 
         alt="Company Logo"
         width={120}
         height={120}

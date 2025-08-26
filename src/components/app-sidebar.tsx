@@ -2,18 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react"
+
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"

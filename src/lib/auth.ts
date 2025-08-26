@@ -39,10 +39,9 @@ export const isAuthenticated = () => {
   return !!getToken()
 }
 
-
 export const logout = () => {
   localStorage.removeItem("token")
-  window.location.href = "/" // redirect to homepage
+  window.location.href = "/" 
 }
 
 export function useAuthRedirect() {
