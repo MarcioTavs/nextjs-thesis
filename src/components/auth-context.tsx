@@ -1,22 +1,20 @@
-"use client"; // This is a client component
+"use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-// Define the shape of the context
 interface AuthContextType {
   role: string | null;
   token: string | null;
+  loading: boolean; // New loading state
   login: (email: string, password: string) => Promise<void>;
   register: (firstName: string, lastName: string, email: string, organizationName: string, phoneNumber: string, password: string, confirmPassword: string) => Promise<void>;
   logout: () => void;
 }
 
-// Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Hook to access the context easily
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
@@ -25,13 +23,13 @@ export function useAuth() {
   return context;
 }
 
-// Provider component
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true); // Start as true (loading)
   const router = useRouter();
 
-  // On mount, load from localStorage
+  // Load from localStorage on mount
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedRole = localStorage.getItem("role");
@@ -39,9 +37,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(storedToken);
       setRole(storedRole);
     }
+    setLoading(false); // Loading complete after check
   }, []);
 
   const login = async (email: string, password: string) => {
+    setLoading(true);
     try {
       const response = await axios.post(
         "http://localhost:8080/api/auth/login",
@@ -57,6 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error("Login failed:", err);
       throw err; 
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     confirmPassword: string
   ) => {
+    setLoading(true);
     if (password !== confirmPassword) {
       throw new Error("Passwords do not match.");
     }
@@ -83,10 +86,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("role", data.role);
       setToken(data.token);
       setRole(data.role);
-      router.push("/organization"); // Redirect after update
+      router.push("/organization");
     } catch (err) {
       console.error("Registration failed:", err);
-      throw err; // Let the form handle errors
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,11 +100,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("role");
     setToken(null);
     setRole(null);
-    router.push("/login"); // Or wherever you want to redirect
+    router.push("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ role, token, login, register, logout }}>
+    <AuthContext.Provider value={{ role, token, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

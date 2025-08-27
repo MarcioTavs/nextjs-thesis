@@ -23,6 +23,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +43,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
       let errorMessage = "An unexpected error occurred.";
       if (err.response) {
         const data = err.response.data;
+       
         if (typeof data === "string") {
           if (data.includes("Email already exists")) {
             errorMessage = "An account with this email already exists.";
@@ -59,6 +61,8 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
       setLoading(false);
     }
   };
+
+  
 
   return (
     <div

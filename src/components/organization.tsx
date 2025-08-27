@@ -60,7 +60,7 @@ export default function Organization() {
     }
   };
 
-  if (!ready) return null; // Don't render anything until checked
+  if (!ready) return null; 
 
   return (
     <section className="p-8 bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen flex items-center justify-center">
