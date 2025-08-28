@@ -178,6 +178,7 @@ export default function Page() {
           },
         }
       );
+      
       setIsClockedIn(false);
       setIsOnBreak(false);
       stopTimer();
@@ -266,6 +267,7 @@ export default function Page() {
             <Button onClick={handleClockOut} disabled={!isClockedIn}>
               <Square />
             </Button>
+            
           </div>
         </header>
         
