@@ -42,7 +42,8 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
     } catch (err: any) {
       let errorMessage = "An unexpected error occurred.";
       if (err.response) {
-        const data = err.response.data; 
+        const data = err.response.data;
+        console.log(data);
        
         if (typeof data === "string") {
           if (data.includes("Email already exists")) {

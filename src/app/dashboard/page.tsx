@@ -34,7 +34,7 @@ export default function Page() {
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
   console.log("User role in Dashboard:", role);
-
+  //console.log("Auth token in Dashboard:", token);kkkkkkkkkkkkkkkkkkkkkkkk
   useEffect(() => {
     if (!loading && !role) {
       router.push("/login");
@@ -267,7 +267,7 @@ export default function Page() {
             <Button onClick={handleClockOut} disabled={!isClockedIn}>
               <Square />
             </Button>
-            
+
           </div>
         </header>
         
