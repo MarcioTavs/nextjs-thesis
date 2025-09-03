@@ -86,7 +86,7 @@ export function NavUser({
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-             
+
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>

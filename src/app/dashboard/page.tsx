@@ -1,3 +1,4 @@
+// In page.tsx
 "use client";
 
 import {
@@ -5,7 +6,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
@@ -14,52 +14,87 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar"; // Uncomment and adjust if needed
-import { useAuth } from "@/components/auth-context"; // Adjust path
+import { AppSidebar } from "@/components/app-sidebar";
+import { useAuth } from "@/components/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CirclePlay, Coffee, Square } from "lucide-react";
 import axios from "axios";
-import { toast } from "sonner"; // Import Sonner's toast for notifications
+import { toast } from "sonner";
+// import EmployeeChart from "@/components/employeechart";
 
 export default function Page() {
-  const { role, loading, token } = useAuth(); // Include token from auth context
+  const { role, loading, token } = useAuth();
   const router = useRouter();
 
-  // State to track attendance status
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [isOnBreak, setIsOnBreak] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0); // In seconds
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
-  console.log("User role in Dashboard:", role);
-  //console.log("Auth token in Dashboard:", token);kkkkkkkkkkkkkkkkkkkkkkkk
   useEffect(() => {
     if (!loading && !role) {
       router.push("/login");
     }
   }, [role, loading, router]);
 
-  // Function to start the timer
+  // New useEffect to fetch attendance status on page load
+  useEffect(() => {
+    const fetchAttendanceStatus = async () => {
+      if (loading || !role || !token) return;
+
+      try {
+        const response = await axios.get("http://localhost:8080/api/attendance/status", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        const { isClockedIn, isOnBreak, elapsedTime } = response.data;
+        setIsClockedIn(isClockedIn);
+        setIsOnBreak(isOnBreak);
+        setElapsedTime(elapsedTime);
+
+        if (isClockedIn && !isOnBreak) {
+          startTimer();
+        }
+      } catch (error) {
+        console.error("Error fetching attendance status:", error);
+        toast("Error", {
+          description: "Failed to fetch attendance status.",
+          className: "bg-destructive text-destructive-foreground",
+        });
+      }
+    };
+
+    fetchAttendanceStatus();
+  }, [loading, role, token]);
+
   const startTimer = () => {
     if (timerInterval) clearInterval(timerInterval);
+    console.log("Timer started at:", new Date());
     const interval = setInterval(() => {
-      setElapsedTime((prev) => prev + 1);
+      if (isClockedIn && !isOnBreak) {
+        setElapsedTime((prev) => {
+          const newTime = prev + 1;
+          console.log("Elapsed time:", newTime);
+          return newTime;
+        });
+      }
     }, 1000);
     setTimerInterval(interval);
   };
 
-  // Function to stop the timer
   const stopTimer = () => {
     if (timerInterval) {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
+    console.log("Timer stopped at:", new Date(), "Elapsed time:", elapsedTime);
     setElapsedTime(0);
   };
 
-  // Format elapsed time as HH:MM:SS
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -67,12 +102,11 @@ export default function Page() {
     return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Handle clock in
   const handleClockIn = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/attendance/clockIn", // Adjust URL if needed
-        {}, // No body for clockIn
+        "http://localhost:8080/api/attendance/clockIn",
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -80,20 +114,22 @@ export default function Page() {
           },
         }
       );
+      console.log("Clock-in response:", response.data);
       setIsClockedIn(true);
+      // setElapsedTime(0); // Removed to preserve elapsedTime from backend
       startTimer();
       toast("Clocked In", {
-        description: "Your work session has started.",
+        description: "Have a nice work session",
       });
     } catch (error: any) {
+      // console.error("Clock-in error:", error.response?.data || error.message);
       toast("Error", {
         description: error.response?.data || "Failed to clock in.",
-        className: "bg-destructive text-destructive-foreground", // Custom class for destructive variant
+        className: "bg-destructive text-destructive-foreground",
       });
     }
   };
 
-  // Handle start break
   const handleStartBreak = async () => {
     if (!isClockedIn) {
       toast("Error", {
@@ -113,12 +149,15 @@ export default function Page() {
           },
         }
       );
+      console.log("Start break response:", response.data);
       setIsOnBreak(true);
-      // Pause timer during break if desired (backend handles break time deduction)
+      if (timerInterval) clearInterval(timerInterval);
+      setTimerInterval(null);
       toast("Break Started", {
         description: "Enjoy your break.",
       });
     } catch (error: any) {
+      console.error("Start break error:", error.response?.data);
       toast("Error", {
         description: error.response?.data || "Failed to start break.",
         className: "bg-destructive text-destructive-foreground",
@@ -126,7 +165,6 @@ export default function Page() {
     }
   };
 
-  // Handle end break
   const handleEndBreak = async () => {
     if (!isOnBreak) {
       toast("Error", {
@@ -146,11 +184,14 @@ export default function Page() {
           },
         }
       );
+      console.log("End break response:", response.data);
       setIsOnBreak(false);
+      startTimer();
       toast("Break Ended", {
         description: "Back to work!",
       });
     } catch (error: any) {
+      console.error("End break error:", error.response?.data);
       toast("Error", {
         description: error.response?.data || "Failed to end break.",
         className: "bg-destructive text-destructive-foreground",
@@ -158,7 +199,6 @@ export default function Page() {
     }
   };
 
-  // Handle clock out
   const handleClockOut = async () => {
     if (!isClockedIn) {
       toast("Error", {
@@ -178,14 +218,16 @@ export default function Page() {
           },
         }
       );
-      
+      const { totalHours, breakInMinutes } = response.data;
+      console.log("Clock-out response:", response.data);
       setIsClockedIn(false);
       setIsOnBreak(false);
       stopTimer();
       toast("Clocked Out", {
-        description: `Total time: ${formatTime(elapsedTime)}`,
+        description: `Total time: ${formatTime(Math.round(totalHours * 3600))} (Break: ${breakInMinutes} minutes)`,
       });
     } catch (error: any) {
+      // console.error("Clock-out error:", error.response?.data);
       toast("Error", {
         description: error.response?.data || "Failed to clock out.",
         className: "bg-destructive text-destructive-foreground",
@@ -223,7 +265,6 @@ export default function Page() {
             </Breadcrumb>
           </div>
         </header>
-        
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
             <div className="bg-muted/50 aspect-video rounded-xl" />
@@ -255,9 +296,7 @@ export default function Page() {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-
-          {/* Clock buttons to log time in and out */}
-          <div className="flex items-center gap-2 px-4"> 
+          <div className="flex items-center gap-2 px-4">
             <Button onClick={handleClockIn} disabled={isClockedIn}>
               <CirclePlay />
             </Button>
@@ -267,23 +306,22 @@ export default function Page() {
             <Button onClick={handleClockOut} disabled={!isClockedIn}>
               <Square />
             </Button>
-
           </div>
         </header>
-        
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {/* Display elapsed time */}
           {isClockedIn && (
             <div className="text-center p-2 bg-gray-100 rounded-md">
-              Time worked: {formatTime(elapsedTime)}
+              Time worked: {formatTime(elapsedTime)} {isOnBreak && "(On Break)"}
             </div>
           )}
           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
             <div className="bg-blue-600 aspect-video rounded-xl" />
+            
             <div className="bg-blue-600 aspect-video rounded-xl" />
             <div className="bg-blue-600 aspect-video rounded-xl" />
           </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+          <div className="bg-yellow-600  min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+
         </div>
       </SidebarInset>
     </SidebarProvider>
