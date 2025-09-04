@@ -18,7 +18,7 @@ import { useAuth } from "@/components/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CirclePlay, Coffee, Square, TimerOff } from "lucide-react";
+import { CirclePlay, Coffee, Square } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import EmployeeChart from "@/components/employeeChart";
@@ -281,7 +281,7 @@ export default function Page() {
       onClick={handleEndBreak}
       className="bg-yellow-500 hover:bg-yellow-600 text-white"
     >
-      <TimerOff />
+      <Coffee />
     </Button>
   ) : (
     <>
