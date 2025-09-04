@@ -27,6 +27,7 @@ export default function Organization() {
     if (typeof window === 'undefined') return;
 
     const role = localStorage.getItem('role');
+    console.log('User role:', role); //
     // Redirect if not admin (including employee, null/undefined, or visitor)
     if (role !== 'ADMIN') {
       router.replace('/login'); // or '/access-denied' as you prefer
@@ -59,7 +60,7 @@ export default function Organization() {
     }
   };
 
-  if (!ready) return null; // Don't render anything until checked
+  if (!ready) return null; 
 
   return (
     <section className="p-8 bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen flex items-center justify-center">

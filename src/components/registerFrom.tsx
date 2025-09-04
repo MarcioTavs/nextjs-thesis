@@ -1,29 +1,19 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import Link from "next/link";
-import axios from "axios";
+import { useAuth } from "@/components/auth-context"; // Adjust path if needed
 
-export function RegisterForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  const router = useRouter();
+export function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
+  const { register } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,62 +23,47 @@ export function RegisterForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError("");
-  if (!firstName || !lastName || !email || !organizationName || !phoneNumber || !password || !confirmPassword) {
-    setError("All fields are required.");
-    return;
-  }
-  if (password !== confirmPassword) {
-    setError("Passwords do not match.");
-    return;
-  }
-  setLoading(true);
-  try {
-    const response = await axios.post(
-      "http://localhost:8080/api/auth/admin/register",
-      {
-        firstName,
-        lastName,
-        email,
-        organizationName,
-        phoneNumber,
-        password,
-        confirmPassword,
-      },
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-    const data = response.data;
-    localStorage.setItem("token", data.token); // Store JWT for API auth
-    localStorage.setItem("role", data.role);      // Store role for admin checks
-    router.push("/organization");                 // Redirect to organization page
-  } catch (err: any) {
-    // Handle errors
-    let errorMessage = "An unexpected error occurred.";
-    if (err.response) {
-      const data = err.response.data;
-      if (typeof data === "string") {
-        if (data.includes("Email already exists")) {
-          errorMessage = "An account with this email already exists.";
-        } else if (data.includes("Password and confirm password must match")) {
-          errorMessage = "Passwords do not match.";
-        } else {
-          errorMessage = data || "Registration failed.";
-        }
-      } else {
-        errorMessage = "Registration failed.";
-      }
+    e.preventDefault();
+    setError("");
+    if (!firstName || !lastName || !email || !organizationName || !phoneNumber || !password || !confirmPassword) {
+      setError("All fields are required.");
+      return;
     }
-    setError(errorMessage);
-  } finally {
-    setLoading(false);
-  }
-};
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await register(firstName, lastName, email, organizationName, phoneNumber, password, confirmPassword);
+    } catch (err: any) {
+      let errorMessage = "An unexpected error occurred.";
+      if (err.response) {
+        const data = err.response.data;
+        console.log(data);
+       
+        if (typeof data === "string") {
+          if (data.includes("Email already exists")) {
+            errorMessage = "An account with this email already exists.";
+          } else if (data.includes("Password and confirm password must match")) {
+            errorMessage = "Passwords do not match.";
+          } else {
+            errorMessage = data || "Registration failed.";
+          }
+        } else {
+          errorMessage = "Registration failed.";
+        }
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  
 
   return (
     <div
@@ -105,6 +80,13 @@ export function RegisterForm({
         />
       
         <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircleIcon className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-5">
               <div className="grid gap-2">

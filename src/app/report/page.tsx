@@ -16,8 +16,8 @@ export default function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/attendance">
-                  Attendances
+                  <BreadcrumbLink href="/report">
+                       Report
                   </BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
