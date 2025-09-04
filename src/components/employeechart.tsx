@@ -76,14 +76,17 @@ export default function EmployeeChart({
               tickLine={false} 
               tickMargin={10} 
               axisLine={false} />
-              
+
               <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
               <ChartLegend content={<ChartLegendContent />} />
               <Bar 
               dataKey="workTime" 
               stackId="a" fill="#4CAF50" 
               radius={[0, 0, 4, 4]} />
-              <Bar dataKey="breakTime" stackId="a" fill="#FFC107" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="breakTime" 
+              stackId="a" fill="#FFC107" 
+              radius={[4, 4, 0, 0]} />
+              
               {/* Optionally show overtime as a separate bar or stack */}
             </BarChart>
           </ChartContainer>

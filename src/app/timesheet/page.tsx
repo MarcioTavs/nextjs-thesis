@@ -18,7 +18,7 @@ import { useAuth } from "@/components/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CirclePlay, Coffee, Square } from "lucide-react";
+import { CirclePlay, Coffee, Square, TimerOff } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 
@@ -279,7 +279,7 @@ export default function Page() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 justify-between transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+       <header className="flex h-16 shrink-0 items-center gap-2 justify-between transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator
@@ -289,29 +289,49 @@ export default function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/timesheet">Timesheet</BreadcrumbLink>
+                  <BreadcrumbLink href="/dashboard">
+                    Timesheet
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
           <div className="flex items-center gap-2 px-4">
-            <Button onClick={handleClockIn} disabled={isClockedIn}>
-              <CirclePlay />
-            </Button>
-            <Button onClick={isOnBreak ? handleEndBreak : handleStartBreak} disabled={!isClockedIn}>
-              <Coffee />
-            </Button>
-            <Button onClick={handleClockOut} disabled={!isClockedIn}>
-              <Square />
-            </Button>
-          </div>
+  {isOnBreak ? (
+    // Only show End Break button when on break
+    <Button
+      onClick={handleEndBreak}
+      className="bg-yellow-500 hover:bg-yellow-600 text-white"
+    >
+      <TimerOff />
+    </Button>
+  ) : (
+    <>
+      {/* Only show Start Break, Clock In, Clock Out when NOT on break */}
+      <Button onClick={handleClockIn} className="bg-green-500 hover:bg-green-600 text-white">
+        <CirclePlay />
+      </Button>
+      <Button
+        onClick={handleStartBreak}
+        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+        disabled={!isClockedIn}
+      >
+        <Coffee />
+      </Button>
+      <Button onClick={handleClockOut} className="bg-red-500 hover:bg-red-600 text-white">
+        <Square />
+      </Button>
+    </>
+  )}
+</div>
+
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {isClockedIn && (
+          {/* {isClockedIn && (
             <div className="text-center p-2 bg-gray-100 rounded-md">
               Time worked: {formatTime(elapsedTime)} {isOnBreak && "(On Break)"}
             </div>
-          )}
+          )} */}
           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
             <div className="bg-blue-600 aspect-video rounded-xl" />
             <div className="bg-blue-600 aspect-video rounded-xl" />

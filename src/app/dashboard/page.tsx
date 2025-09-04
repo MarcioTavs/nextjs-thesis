@@ -18,7 +18,7 @@ import { useAuth } from "@/components/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CirclePlay, Coffee, Square } from "lucide-react";
+import { CirclePlay, Coffee, Square, TimerOff } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import EmployeeChart from "@/components/employeeChart";
@@ -55,12 +55,12 @@ export default function Page() {
       setWorkTimeInMinutes(workTimeInMinutes || 0);
       setBreakInMinutes(breakInMinutes || 0);
       setChartData([{ month: "Today", workTime: workTimeInMinutes, breakTime: breakInMinutes }]);
-      // console.log(`Fetched status at ${new Date().toLocaleTimeString()}: workTimeInMinutes=${workTimeInMinutes}, breakInMinutes=${breakInMinutes}`);
+      console.log(`Fetched status at ${new Date().toLocaleTimeString()}: workTimeInMinutes=${workTimeInMinutes}, breakInMinutes=${breakInMinutes}`);
     } catch (error) {
       console.error("Error fetching attendance status:", error);
       toast("Error", {
         description: "Failed to fetch attendance status.",
-        className: "bg-destructive text-destructive-foreground",
+        className: "text-black",
       });
     }
   };
@@ -74,10 +74,17 @@ export default function Page() {
   const formatTime = (minutes: number) => {
     const hrs = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:00`;
+    return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
   };
 
   const handleClockIn = async () => {
+    if (isClockedIn) {
+      toast("Error", {
+        description: "You have already clocked in.",
+        className: "text-black",
+      });
+      return;
+    }
     try {
       const response = await axios.post(
         "http://localhost:8080/api/attendance/clockIn",
@@ -95,12 +102,13 @@ export default function Page() {
       setBreakInMinutes(0);
       toast("Clocked In", {
         description: "Have a nice work session",
+        className: "text-black",
       });
-      fetchAttendanceStatus(); // Refresh status immediately
+      fetchAttendanceStatus();
     } catch (error: any) {
       toast("Error", {
         description: error.response?.data || "Failed to clock in.",
-        className: "bg-destructive text-destructive-foreground",
+        className: "text-black",
       });
     }
   };
@@ -109,7 +117,7 @@ export default function Page() {
     if (!isClockedIn) {
       toast("Error", {
         description: "You must be clocked in to start a break.",
-        className: "bg-destructive text-destructive-foreground",
+        className: "text-black",
       });
       return;
     }
@@ -128,12 +136,13 @@ export default function Page() {
       setIsOnBreak(true);
       toast("Break Started", {
         description: "Enjoy your break.",
+        className: "text-black",
       });
-      fetchAttendanceStatus(); // Refresh status immediately
+      fetchAttendanceStatus();
     } catch (error: any) {
       toast("Error", {
         description: error.response?.data || "Failed to start break.",
-        className: "bg-destructive text-destructive-foreground",
+        className: "text-black",
       });
     }
   };
@@ -142,7 +151,7 @@ export default function Page() {
     if (!isOnBreak) {
       toast("Error", {
         description: "No active break to end.",
-        className: "bg-destructive text-destructive-foreground",
+        className: "text-black",
       });
       return;
     }
@@ -161,12 +170,13 @@ export default function Page() {
       setIsOnBreak(false);
       toast("Break Ended", {
         description: "Back to work!",
+        className: "text-black",
       });
-      fetchAttendanceStatus(); // Refresh status immediately
+      fetchAttendanceStatus();
     } catch (error: any) {
       toast("Error", {
         description: error.response?.data || "Failed to end break.",
-        className: "bg-destructive text-destructive-foreground",
+        className: "text-black",
       });
     }
   };
@@ -175,7 +185,7 @@ export default function Page() {
     if (!isClockedIn) {
       toast("Error", {
         description: "You are not clocked in.",
-        className: "bg-destructive text-destructive-foreground",
+        className: "text-black",
       });
       return;
     }
@@ -198,22 +208,18 @@ export default function Page() {
       setBreakInMinutes(breakInMinutes);
       toast("Clocked Out", {
         description: `Total time: ${formatTime(Math.round(totalHours * 60))} (Break: ${breakInMinutes} minutes)`,
+        className: "text-black",
       });
     } catch (error: any) {
       toast("Error", {
         description: error.response?.data || "Failed to clock out.",
-        className: "bg-destructive text-destructive-foreground",
+        className: "text-black",
       });
     }
   };
 
-  if (loading) {
-    return <div>Loading page...</div>;
-  }
-
-  if (!role) {
-    return <div>Redirecting...</div>;
-  }
+  if (loading) return <div>Loading page...</div>;
+  if (!role) return <div>Redirecting...</div>;
 
   return role === "ADMIN" ? (
     <SidebarProvider>
@@ -269,23 +275,40 @@ export default function Page() {
             </Breadcrumb>
           </div>
           <div className="flex items-center gap-2 px-4">
-            <Button onClick={handleClockIn} disabled={isClockedIn} className="bg-green-500 hover:bg-green-600 text-white">
-              <CirclePlay />
-            </Button>
-            <Button onClick={isOnBreak ? handleEndBreak : handleStartBreak} disabled={!isClockedIn} className="bg-yellow-500 hover:bg-yellow-600 text-white">
-              <Coffee />
-            </Button>
-            <Button onClick={handleClockOut} disabled={!isClockedIn} className="bg-red-500 hover:bg-red-600 text-white">
-              <Square />
-            </Button>
-          </div>
+  {isOnBreak ? (
+    // Only show End Break button when on break
+    <Button
+      onClick={handleEndBreak}
+      className="bg-yellow-500 hover:bg-yellow-600 text-white"
+    >
+      <TimerOff />
+    </Button>
+  ) : (
+    <>
+      {/* Only show Start Break, Clock In, Clock Out when NOT on break */}
+      <Button onClick={handleClockIn} className="bg-green-500 hover:bg-green-600 text-white">
+        <CirclePlay />
+      </Button>
+      <Button
+        onClick={handleStartBreak}
+        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+        disabled={!isClockedIn}
+      >
+        <Coffee />
+      </Button>
+      <Button onClick={handleClockOut} className="bg-red-500 hover:bg-red-600 text-white">
+        <Square />
+      </Button>
+    </>
+  )}
+</div>
+
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
             <div className="bg-muted/50 aspect-video rounded-xl" />
             <div className="bg-muted/50 aspect-video rounded-xl" />
             <div className="bg-muted/50 aspect-video rounded-xl" />
-          
           </div>
           <EmployeeChart data={chartData} />
         </div>
