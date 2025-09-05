@@ -16,7 +16,7 @@ const chartConfig = {
   overtimeTime: { label: "Overtime", color: "#F44336" },
 } satisfies ChartConfig;
 
-// ---- Add this function ----
+
 function formatTime(minutes: number) {
   const hrs = Math.floor(minutes / 60);
   const mins = minutes % 60;
@@ -35,8 +35,8 @@ export default function EmployeeChart({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Horas Registradas</CardTitle>
-        <CardDescription className="text-xs">Hoje</CardDescription>
+        <CardTitle className="text-base">Hours Recorded</CardTitle>
+        <CardDescription className="text-xs">Today</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-row gap-8">
         {/* Left Info Panel */}
