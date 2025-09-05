@@ -112,7 +112,7 @@ export default function WeeklyTimesheetChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Weekly Timesheet Chart</CardTitle>
+        <CardTitle>Weekly Timesheet </CardTitle>
         <CardDescription>Worked and break time per day (in minutes).</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-row gap-8">
