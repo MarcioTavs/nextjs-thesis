@@ -3,6 +3,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html,
+body,
+* {
+  font-family: 'Nunito', sans-serif! important;
+
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
