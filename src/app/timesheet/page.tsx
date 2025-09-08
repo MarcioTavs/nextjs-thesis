@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { CirclePlay, Coffee, Square, TimerOff } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
+import Employeetable from "@/components/employeetable";
+import ChartTooltipDefault from "@/components/employeeweekchart";
 
 export default function Page() {
   const { role, loading, token } = useAuth();
@@ -289,7 +291,7 @@ export default function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/dashboard">
+                  <BreadcrumbLink href="/timesheet">
                     Timesheet
                   </BreadcrumbLink>
                 </BreadcrumbItem>
@@ -327,19 +329,16 @@ export default function Page() {
 
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {/* {isClockedIn && (
-            <div className="text-center p-2 bg-gray-100 rounded-md">
-              Time worked: {formatTime(elapsedTime)} {isOnBreak && "(On Break)"}
-            </div>
-          )} */}
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-blue-600 aspect-video rounded-xl" />
-            <div className="bg-blue-600 aspect-video rounded-xl" />
-            <div className="bg-blue-600 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24" >  
+            <Employeetable />
+              </div>
+                <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24">
+                <ChartTooltipDefault/>
+             </div>
         </div>
+
+        
       </SidebarInset>
     </SidebarProvider>
   );
-}
+} 

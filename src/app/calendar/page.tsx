@@ -41,7 +41,7 @@ export default function Page() {
     };
   }, [role, loading, router, timerInterval]);
 
-  // Fetch attendance status on page load
+  // Fetch attendance status on page load 
   useEffect(() => {
     const fetchAttendanceStatus = async () => {
       if (loading || !role || !token) return;
@@ -293,7 +293,7 @@ export default function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/dashboard">
+                  <BreadcrumbLink href="/calendar">
                     Calendar
                   </BreadcrumbLink>
                 </BreadcrumbItem>
