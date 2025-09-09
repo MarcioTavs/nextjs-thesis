@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { ChevronsUpDown, BadgeCheck, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,6 +25,7 @@ import { getToken } from "@/lib/auth";
 export function NavUser() {
   const { isMobile } = useSidebar();
   const [user, setUser] = useState({ email: "Loading...", avatar: "" });
+  const router = useRouter();
 
   const getInitials = (email?: string) => {
     if (!email) return "..";
@@ -93,7 +95,7 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/settings")}>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
