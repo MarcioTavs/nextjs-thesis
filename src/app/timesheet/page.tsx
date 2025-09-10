@@ -21,9 +21,9 @@ import { Button } from "@/components/ui/button";
 import { CirclePlay, Coffee, Square, TimerOff } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import Employeetable from "@/components/employeetable";
-import ChartTooltipDefault from "@/components/employeeweekchart";
-import Timesheet from "@/components/timesheet";
+import Employeetable from "@/components/employee/employeetable";
+import ChartTooltipDefault from "@/components/employee/employeeweekchart";
+import Timesheet from "@/components/admin/timesheet";
 
 export default function Page() {
   const { role, loading, token } = useAuth();
@@ -273,13 +273,8 @@ export default function Page() {
           <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24" >  
             <Timesheet />
               </div>
-              
         </div>
-          
         </div>
-       
-
-        
       </SidebarInset>
     </SidebarProvider>
   ) : (

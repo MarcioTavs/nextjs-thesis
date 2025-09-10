@@ -21,8 +21,8 @@ import { Button } from "@/components/ui/button";
 import { CirclePlay, Coffee, Square, Table } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import EmployeeChart from "@/components/employeechart";
-import ActiveEmployee from "@/components/activeEmp";
+import EmployeeChart from "@/components/employee/employeechart";
+import ActiveEmployee from "@/components/admin/activeEmp";
 
 export default function Page() {
   const { role, loading, token } = useAuth();
