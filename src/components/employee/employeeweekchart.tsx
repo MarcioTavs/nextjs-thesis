@@ -54,7 +54,14 @@ export default function WeeklyTimesheetChart() {
         throw new Error("No authentication token found");
       }
 
-      const response = await fetch("http://localhost:8080/api/attendance/weeklyReport?startDate=2025-09-04", {
+      // Dynamic startDate: Start of current week (Monday)
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)); // Adjust to Monday
+      const startDate = startOfWeek.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+      const response = await fetch(`http://localhost:8080/api/attendance/weeklyReport?startDate=${startDate}`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -112,7 +119,7 @@ export default function WeeklyTimesheetChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Weekly Timesheet </CardTitle>
+        <CardTitle>Weekly Timesheet</CardTitle>
         <CardDescription>Worked and break time per day (in minutes).</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-row gap-8">

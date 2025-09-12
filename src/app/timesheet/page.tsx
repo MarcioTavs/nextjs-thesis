@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import Employeetable from "@/components/employee/employeetable";
 import ChartTooltipDefault from "@/components/employee/employeeweekchart";
 import Timesheet from "@/components/admin/timesheet";
+import ActiveEmployee from "@/components/admin/activeEmp";
 
 export default function Page() {
   const { role, loading, token } = useAuth();
@@ -271,8 +272,12 @@ export default function Page() {
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24" >  
+            <ActiveEmployee />
+              </div>
+                <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24">
             <Timesheet />
               </div>
+                 
         </div>
         </div>
       </SidebarInset>

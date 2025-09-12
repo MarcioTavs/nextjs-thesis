@@ -18,11 +18,13 @@ import { useAuth } from "@/components/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CirclePlay, Coffee, Square, Table } from "lucide-react";
+import { CirclePlay, Coffee, Square, Table, TimerOff } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import EmployeeChart from "@/components/employee/employeechart";
 import ActiveEmployee from "@/components/admin/activeEmp";
+import ProfileCard from "@/components/profileCard";
+import DepartmentCard from "@/components/departmentCard";
 
 export default function Page() {
   const { role, loading, token } = useAuth();
@@ -36,7 +38,7 @@ export default function Page() {
 
   useEffect(() => {
     if (!loading && !role) {
-      router.push("/login");
+      router.push("/login"); // Redirect to login if not authenticated
     }
   }, [role, loading, router]);
 
@@ -58,7 +60,6 @@ export default function Page() {
       setChartData([{ month: "Today", workTime: workTimeInMinutes, breakTime: breakInMinutes }]);
       console.log(`Fetched status at ${new Date().toLocaleTimeString()}: workTimeInMinutes=${workTimeInMinutes}, breakInMinutes=${breakInMinutes}`);
     } catch (error) {
-      console.error("Error fetching attendance status:", error);
       toast("Error", {
         description: "Failed to fetch attendance status.",
         className: "text-black",
@@ -245,10 +246,11 @@ export default function Page() {
           </div>
         </header>
          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
+          <div className="grid auto-rows-min gap-4 md:grid-cols-2">
+            <ProfileCard />
+            <DepartmentCard />
+            {/* <div className="bg-muted/50 aspect-video rounded-xl" /> */}
+
           </div>
            <ActiveEmployee />
         </div>
@@ -282,8 +284,8 @@ export default function Page() {
     <Button
       onClick={handleEndBreak}
       className="bg-yellow-500 hover:bg-yellow-600 text-white"
-    >
-      <Coffee />
+      >
+      <TimerOff />
     </Button>
   ) : (
     <>
@@ -294,7 +296,7 @@ export default function Page() {
       <Button
         onClick={handleStartBreak}
         className="bg-yellow-500 hover:bg-yellow-600 text-white"
-        disabled={!isClockedIn}
+        // disabled={!isClockedIn}
       >
         <Coffee />
       </Button>
@@ -307,10 +309,11 @@ export default function Page() {
 
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
+          <div className="grid auto-rows-min gap-4 md:grid-cols-2">
+            <ProfileCard />
+            <DepartmentCard />
+            {/* <div className="bg-muted/50 aspect-video rounded-xl" /> */}
+
           </div>
           <EmployeeChart data={chartData} />
         </div>

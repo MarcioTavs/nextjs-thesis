@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRole(data.role);
       router.push("/dashboard"); 
     } catch (err) {
-      console.error("Login failed:", err);
+    
       throw err; 
     } finally {
       setLoading(false);
@@ -88,7 +88,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRole(data.role);
       router.push("/organization");
     } catch (err) {
-      console.error("Registration failed:", err);
       throw err;
     } finally {
       setLoading(false);

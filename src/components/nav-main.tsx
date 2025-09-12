@@ -34,7 +34,7 @@ import { useAuth } from "./auth-context";
 export function NavMain() {
 
 const { role } = useAuth();
-  // console.log("User role in NavMain:", role);
+
 
   return (
     role === "ADMIN" ? (

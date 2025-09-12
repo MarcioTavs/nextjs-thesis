@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getToken, useAuthRedirect } from "@/lib/auth"; // Adjust the import path based on your project structure
+import { getToken, useAuthRedirect } from "@/lib/auth";
 
 interface DailyTimesheet {
   workedHours: number;
@@ -23,7 +23,7 @@ interface WeeklyTimesheet {
 
 function formatTime(minutes: number) {
   const hrs = Math.floor(minutes / 60);
-  const mins = Math.round(minutes % 60); // Round to nearest whole minute
+  const mins = Math.round(minutes % 60);
   return `${hrs}h ${mins}m`;
 }
 
@@ -90,7 +90,8 @@ export default function WeeklyTimesheetTable() {
       <TableCaption>Your weekly timesheet report</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead>Day</TableHead>
+          {/* Compact: All <TableHead> in one line to avoid whitespace text nodes */}
+          <TableHead>Metric</TableHead>
           {sortedDays.map((day) => (
             <TableHead key={day}>{day}</TableHead>
           ))}
