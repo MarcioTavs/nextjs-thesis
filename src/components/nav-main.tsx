@@ -9,6 +9,8 @@ import {
   ChevronRight,
   LayoutDashboard,
   type LucideIcon,
+  Building2,
+  Folders,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -49,6 +51,17 @@ const { role } = useAuth();
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
+
+
+            <SidebarMenuItem>
+            <Link href="/department" className="w-full">
+              <SidebarMenuButton className="cursor-pointer w-full">
+                <Building2/>
+                Department
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+
           <SidebarMenuItem>
             <Link href="/timesheet" className="w-full">
               <SidebarMenuButton className="cursor-pointer w-full">
@@ -60,11 +73,12 @@ const { role } = useAuth();
           <SidebarMenuItem>
             <Link href="/report" className="w-full">
               <SidebarMenuButton className="cursor-pointer w-full">
-                <CalendarClock />
+                <Folders />
                 Report
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
+
           <SidebarMenuItem>
             <Link href="/calendar" className="w-full">
               <SidebarMenuButton className="cursor-pointer w-full">
@@ -75,6 +89,8 @@ const { role } = useAuth();
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
+
+
     ) : (
       <SidebarGroup>
         <SidebarGroupLabel>Platform</SidebarGroupLabel>

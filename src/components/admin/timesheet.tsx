@@ -8,6 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { getToken } from "@/lib/auth";
 
@@ -50,6 +56,11 @@ export default function Timesheet() {
   }, []);
 
   return (
+    <div className="h-full w-full ">
+      <CardHeader className="pt-6 pb-6">
+        <CardTitle >Weekly Timesheet</CardTitle>
+        <CardDescription>Weekly timesheet report for all employees</CardDescription>
+      </CardHeader>
     <Table>
       <TableCaption>Weekly Timesheet for Employees (Sep 9 - Sep 15, 2025)</TableCaption>
       <TableHeader>
@@ -90,5 +101,7 @@ export default function Timesheet() {
         </TableRow>
       </TableFooter>
     </Table>
+    </div>
+    
   );
 }

@@ -5,6 +5,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -16,16 +17,11 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/components/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { CalendarDemo } from "@/components/calendar";
 import { Button } from "@/components/ui/button";
 import { CirclePlay, Coffee, Square, TimerOff } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import EmployeeChart from "@/components/employee/employeechart";
-import ProfileCard from "@/components/profileCard";
-import DepartmentCard from "@/components/departmentCard";
-import ActiveEmployee from "@/components/admin/activeEmp";
-import EmployeeStatus from "@/components/admin/employeeStatus";
-
 
 export default function Page() {
   const { role, loading, token } = useAuth();
@@ -33,61 +29,83 @@ export default function Page() {
 
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [isOnBreak, setIsOnBreak] = useState(false);
-  const [workTimeInMinutes, setWorkTimeInMinutes] = useState(0);
-  const [breakInMinutes, setBreakInMinutes] = useState(0);
-  const [chartData, setChartData] = useState([{ month: "Today", workTime: 0, breakTime: 0 }]);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!loading && !role) {
-      router.push("/login"); // Redirect to login if not authenticated
+      router.push("/login");
     }
-  }, [role, loading, router]);
+    return () => {
+      if (timerInterval) clearInterval(timerInterval); // Cleanup on unmount
+    };
+  }, [role, loading, router, timerInterval]);
 
-  const fetchAttendanceStatus = async () => {
-    if (loading || !role || !token) return;
-
-    try {
-      const response = await axios.get("http://localhost:8080/api/attendance/status", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      const { isClockedIn, isOnBreak, workTimeInMinutes, breakInMinutes } = response.data;
-      setIsClockedIn(isClockedIn);
-      setIsOnBreak(isOnBreak);
-      setWorkTimeInMinutes(workTimeInMinutes || 0);
-      setBreakInMinutes(breakInMinutes || 0);
-      setChartData([{ month: "Today", workTime: workTimeInMinutes, breakTime: breakInMinutes }]);
-      console.log(`Fetched status at ${new Date().toLocaleTimeString()}: workTimeInMinutes=${workTimeInMinutes}, breakInMinutes=${breakInMinutes}`);
-    } catch (error) {
-      toast("Error", {
-        description: "Failed to fetch attendance status.",
-        className: "text-black",
-      });
-    }
-  };
-
+  // Fetch attendance status on page load 
   useEffect(() => {
+    const fetchAttendanceStatus = async () => {
+      if (loading || !role || !token) return;
+
+      try {
+        const response = await axios.get("http://localhost:8080/api/attendance/status", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        const { isClockedIn, isOnBreak, elapsedTime } = response.data;
+        setIsClockedIn(isClockedIn);
+        setIsOnBreak(isOnBreak);
+        setElapsedTime(elapsedTime || 0); // Use backend elapsedTime or 0
+        console.log("Attendance status:", response.data);
+
+        if (isClockedIn && !isOnBreak) {
+          startTimer();
+        }
+      } catch (error) {
+        console.error("Error fetching attendance status:", error);
+        toast("Error", {
+          description: "Failed to fetch attendance status.",
+          className: "bg-destructive text-destructive-foreground",
+        });
+      }
+    };
+
     fetchAttendanceStatus();
-    const interval = setInterval(fetchAttendanceStatus, 60000); // Refresh every 60 seconds
-    return () => clearInterval(interval); // Cleanup on unmount
   }, [loading, role, token]);
 
-  const formatTime = (minutes: number) => {
-    const hrs = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+  const startTimer = () => {
+    if (timerInterval) clearInterval(timerInterval);
+    console.log("Timer started at:", new Date());
+    const interval = setInterval(() => {
+      if (isClockedIn && !isOnBreak) {
+        setElapsedTime((prev) => {
+          const newTime = prev + 1;
+          console.log("Elapsed time:", newTime, "Formatted:", formatTime(newTime));
+          return newTime;
+        });
+      }
+    }, 1000);
+    setTimerInterval(interval);
+  };
+
+  const stopTimer = () => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      setTimerInterval(null);
+    }
+    console.log("Timer stopped at:", new Date(), "Elapsed time:", elapsedTime);
+    setElapsedTime(0);
+  };
+
+  const formatTime = (seconds: number) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleClockIn = async () => {
-    if (isClockedIn) {
-      toast("Error", {
-        description: "You have already clocked in.",
-        className: "text-black",
-      });
-      return;
-    }
     try {
       const response = await axios.post(
         "http://localhost:8080/api/attendance/clockIn",
@@ -101,17 +119,16 @@ export default function Page() {
       );
       console.log("Clock-in response:", response.data);
       setIsClockedIn(true);
-      setWorkTimeInMinutes(0);
-      setBreakInMinutes(0);
+      setElapsedTime(0); // Reset timer
+      startTimer();
       toast("Clocked In", {
         description: "Have a nice work session",
-        className: "text-black",
       });
-      fetchAttendanceStatus();
     } catch (error: any) {
+      //console.error("Clock-in error:", error.response?.data || error.message);
       toast("Error", {
         description: error.response?.data || "Failed to clock in.",
-        className: "text-black",
+        className: "bg-destructive text-destructive-foreground",
       });
     }
   };
@@ -120,7 +137,7 @@ export default function Page() {
     if (!isClockedIn) {
       toast("Error", {
         description: "You must be clocked in to start a break.",
-        className: "text-black",
+        className: "bg-destructive text-destructive-foreground",
       });
       return;
     }
@@ -137,15 +154,16 @@ export default function Page() {
       );
       console.log("Start break response:", response.data);
       setIsOnBreak(true);
+      if (timerInterval) clearInterval(timerInterval);
+      setTimerInterval(null);
       toast("Break Started", {
         description: "Enjoy your break.",
-        className: "text-black",
       });
-      fetchAttendanceStatus();
     } catch (error: any) {
+      console.error("Start break error:", error.response?.data);
       toast("Error", {
         description: error.response?.data || "Failed to start break.",
-        className: "text-black",
+        className: "bg-destructive text-destructive-foreground",
       });
     }
   };
@@ -154,7 +172,7 @@ export default function Page() {
     if (!isOnBreak) {
       toast("Error", {
         description: "No active break to end.",
-        className: "text-black",
+        className: "bg-destructive text-destructive-foreground",
       });
       return;
     }
@@ -171,15 +189,15 @@ export default function Page() {
       );
       console.log("End break response:", response.data);
       setIsOnBreak(false);
+      startTimer();
       toast("Break Ended", {
         description: "Back to work!",
-        className: "text-black",
       });
-      fetchAttendanceStatus();
     } catch (error: any) {
+      console.error("End break error:", error.response?.data);
       toast("Error", {
         description: error.response?.data || "Failed to end break.",
-        className: "text-black",
+        className: "bg-destructive text-destructive-foreground",
       });
     }
   };
@@ -188,7 +206,7 @@ export default function Page() {
     if (!isClockedIn) {
       toast("Error", {
         description: "You are not clocked in.",
-        className: "text-black",
+        className: "bg-destructive text-destructive-foreground",
       });
       return;
     }
@@ -203,26 +221,30 @@ export default function Page() {
           },
         }
       );
-      const { totalHours, breakInMinutes, workTimeInMinutes } = response.data;
+      const { totalHours, breakInMinutes } = response.data;
       console.log("Clock-out response:", response.data);
       setIsClockedIn(false);
       setIsOnBreak(false);
-      setWorkTimeInMinutes(workTimeInMinutes);
-      setBreakInMinutes(breakInMinutes);
+      stopTimer();
       toast("Clocked Out", {
-        description: `Total time: ${formatTime(Math.round(totalHours * 60))} (Break: ${breakInMinutes} minutes)`,
-        className: "text-black",
+        description: `Total time: ${formatTime(Math.round(totalHours * 3600))} (Break: ${breakInMinutes} minutes)`,
       });
     } catch (error: any) {
+      console.error("Clock-out error:", error.response?.data);
       toast("Error", {
         description: error.response?.data || "Failed to clock out.",
-        className: "text-black",
+        className: "bg-destructive text-destructive-foreground",
       });
     }
   };
 
-  if (loading) return <div>Loading page...</div>;
-  if (!role) return <div>Redirecting...</div>;
+  if (loading) {
+    return <div>Loading page...</div>;
+  }
+
+  if (!role) {
+    return <div>Redirecting...</div>;
+  }
 
   return role === "ADMIN" ? (
     <SidebarProvider>
@@ -238,31 +260,30 @@ export default function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/dashboard">
-                    Dashboard
-                  </BreadcrumbLink>
+                  <BreadcrumbLink href="/department">Department</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
-         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-2">
-            <ProfileCard />
-            <DepartmentCard />
-            {/* <div className="bg-muted/50 aspect-video rounded-xl" /> */}
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+            <div className="bg-muted/50 aspect-video rounded-xl">
+              <CalendarDemo />
+            </div>
+         
+            <div className="bg-muted/50 aspect-video rounded-xl" />
+            <div className="bg-muted/50 aspect-video rounded-xl" />
           </div>
-           <EmployeeStatus />
-          
+          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
         </div>
-
       </SidebarInset>
     </SidebarProvider>
   ) : (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 justify-between transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+       <header className="flex h-16 shrink-0 items-center gap-2 justify-between transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator
@@ -272,8 +293,8 @@ export default function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/dashboard">
-                    Dashboard
+                  <BreadcrumbLink href="/calendar">
+                    Calendar
                   </BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -285,7 +306,7 @@ export default function Page() {
     <Button
       onClick={handleEndBreak}
       className="bg-yellow-500 hover:bg-yellow-600 text-white"
-      >
+    >
       <TimerOff />
     </Button>
   ) : (
@@ -297,7 +318,7 @@ export default function Page() {
       <Button
         onClick={handleStartBreak}
         className="bg-yellow-500 hover:bg-yellow-600 text-white"
-        // disabled={!isClockedIn}
+        disabled={!isClockedIn}
       >
         <Coffee />
       </Button>
@@ -310,13 +331,19 @@ export default function Page() {
 
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-2">
-            <ProfileCard />
-            <DepartmentCard />
-            {/* <div className="bg-muted/50 aspect-video rounded-xl" /> */}
-
+          {/* {isClockedIn && (
+            <div className="text-center p-2 bg-gray-100 rounded-md">
+              Time worked: {formatTime(elapsedTime)} {isOnBreak && "(On Break)"}
+            </div>
+          )} */}
+          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+            <div className="bg-blue-600 aspect-video rounded-xl">
+              <CalendarDemo />
+            </div>
+            <div className="bg-blue-600 aspect-video rounded-xl" />
+            <div className="bg-blue-600 aspect-video rounded-xl" />
           </div>
-          <EmployeeChart data={chartData} />
+          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
         </div>
       </SidebarInset>
     </SidebarProvider>

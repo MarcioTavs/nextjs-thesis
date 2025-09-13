@@ -9,9 +9,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useAuth } from "@/components/auth-context";
 import axios from "axios";
 import { useEffect, useState } from "react";
+
 
 interface EmployeeAttendance {
   employeeId: string;
@@ -74,7 +82,12 @@ export default function ActiveEmployee() {
   }
 
   return (
-    <Table>
+    <div className="h-full w-full px-12">
+      <CardHeader className="pt-6 pb-6">
+        <CardTitle>Active Employees</CardTitle>
+        <CardDescription>A list of today's logged-in employees</CardDescription>
+      </CardHeader>
+      <Table>
       <TableCaption>A list of today's logged-in employees.</TableCaption>
       <TableHeader>
         <TableRow>
@@ -103,5 +116,6 @@ export default function ActiveEmployee() {
         )}
       </TableBody>
     </Table>
+    </div>
   );
 }

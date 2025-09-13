@@ -25,6 +25,7 @@ import Employeetable from "@/components/employee/employeetable";
 import ChartTooltipDefault from "@/components/employee/employeeweekchart";
 import Timesheet from "@/components/admin/timesheet";
 import ActiveEmployee from "@/components/admin/activeEmp";
+import { Card } from "@/components/ui/card";
 
 export default function Page() {
   const { role, loading, token } = useAuth();
@@ -271,12 +272,12 @@ export default function Page() {
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24" >  
+          <Card className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min pt-0" >  
             <ActiveEmployee />
-              </div>
-                <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24">
-            <Timesheet />
-              </div>
+              </Card>
+                <Card className="w-full h-full p-4 bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min">
+            <Timesheet/>
+              </Card>
                  
         </div>
         </div>
@@ -334,15 +335,14 @@ export default function Page() {
 
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24" >  
+          <Card className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min pt-0" >  
             <Employeetable />
-              </div>
-                <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24">
-                <ChartTooltipDefault/>
-             </div>
-        </div>
+              </Card>
 
-        
+            <Card className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min pt-0" >
+                <ChartTooltipDefault/>
+             </Card>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
