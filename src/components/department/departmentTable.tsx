@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useEffect, useState, useRef } from "react";
 import {
@@ -51,101 +51,14 @@ interface Department {
   createdAt: string;
 }
 
-export const columns: ColumnDef<Department>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "departmentId",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Department ID
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div>{row.getValue("departmentId")}</div>,
-  },
-  {
-    accessorKey: "name",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Name
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div>{row.getValue("name")}</div>,
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"));
-      return <div>{date.toLocaleDateString()}</div>;
-    },
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const department = row.original;
-      return (
-        <div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => {
-                toast.info(`Edit department ${department.departmentId}`);
-                // Add edit logic here if needed
-              }}
-            >
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                toast.info(`Add member to ${department.departmentId}`);
-                // Add member logic here if needed
-              }}
-            >
-              Add Member
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        </div>
-      );
-    },
-  },
-];
+interface EmployeeFormData {
+  employeeId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  project: string;
+}
 
 export default function DepartmentTable() {
   const { token, loading: authLoading } = useAuth();
@@ -158,9 +71,117 @@ export default function DepartmentTable() {
   const [departmentId, setDepartmentId] = useState("");
   const [departmentName, setDepartmentName] = useState("");
   const [open, setOpen] = useState(false);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
+  const [employeeData, setEmployeeData] = useState<EmployeeFormData>({
+    employeeId: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    project: "",
+  });
+  const [loading, setLoading] = useState(false);
   const isMounted = useRef(false);
 
-  // Initialize table at the top of the component
+  const columns: ColumnDef<Department>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "departmentId",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Department ID
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue("departmentId")}</div>,
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue("name")}</div>,
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created At",
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("createdAt"));
+        return <div>{date.toLocaleDateString()}</div>;
+      },
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const department = row.original;
+
+        return (
+          <div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    toast.info(`Edit department ${department.departmentId}`);
+                    // Add edit logic here if needed
+                  }}
+                >
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedDepartmentId(department.departmentId);
+                    setAddMemberOpen(true);
+                    toast.info(`Add member to ${department.departmentId}`);
+                  }}
+                >
+                  Add Member
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
+
   const table = useReactTable({
     data,
     columns,
@@ -248,8 +269,64 @@ export default function DepartmentTable() {
     }
   };
 
+  const handleAddEmployee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token || !selectedDepartmentId) {
+      toast.error("No authentication token or department selected");
+      return;
+    }
+
+    // Optimistically close dialog and reset form immediately
+    const previousOpenState = addMemberOpen;
+    const previousSelectedDepartmentId = selectedDepartmentId;
+    const previousEmployeeData = employeeData;
+
+    setAddMemberOpen(false);
+    setSelectedDepartmentId("");
+    setEmployeeData({
+      employeeId: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      project: "",
+    });
+
+    // Show loading toast right away
+    const loadingToast = toast.loading("Adding employee...");
+
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `http://localhost:8080/api/admin/add-employee-department?departmentId=${previousSelectedDepartmentId}`,
+        previousEmployeeData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      toast.dismiss(loadingToast);
+      toast.success("Employee added successfully to the department");
+    } catch (error: any) {
+      // Revert UI on error
+      setAddMemberOpen(previousOpenState);
+      setSelectedDepartmentId(previousSelectedDepartmentId);
+      setEmployeeData(previousEmployeeData);
+      toast.dismiss(loadingToast);
+      if (error.response && error.response.status === 409) {
+        toast.error("This email is already registered. Please use a different email.");
+      } else {
+        toast.error(error.response?.data || "Failed to add employee");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="w-full ">
+    <div className="w-full">
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter departments..."
@@ -326,7 +403,7 @@ export default function DepartmentTable() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-hidden overflow-x-hidden overflow-y-hidden rounded-md border">
         <Table className="bg-muted/50">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -373,8 +450,115 @@ export default function DepartmentTable() {
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-       
       </div>
+      <Dialog open={addMemberOpen} onOpenChange={setAddMemberOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Add Member to {data.find((d) => d.departmentId === selectedDepartmentId)?.name || "Selected Department"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddEmployee} className="space-y-4">
+            <div>
+              <Label htmlFor="employeeId">Employee ID</Label>
+              <div className="mt-4">
+                <Input
+                  id="employeeId"
+                  value={employeeData.employeeId}
+                  onChange={(e) =>
+                    setEmployeeData({ ...employeeData, employeeId: e.target.value })
+                  }
+                  placeholder="Enter employee ID (e.g., EMP-001)"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="firstName">First Name</Label>
+              <div className="mt-4">
+                <Input
+                  id="firstName"
+                  value={employeeData.firstName}
+                  onChange={(e) =>
+                    setEmployeeData({ ...employeeData, firstName: e.target.value })
+                  }
+                  placeholder="Enter first name"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="lastName">Last Name</Label>
+              <div className="mt-4">
+                <Input
+                  id="lastName"
+                  value={employeeData.lastName}
+                  onChange={(e) =>
+                    setEmployeeData({ ...employeeData, lastName: e.target.value })
+                  }
+                  placeholder="Enter last name"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <div className="mt-4">
+                <Input
+                  id="email"
+                  type="email"
+                  value={employeeData.email}
+                  onChange={(e) =>
+                    setEmployeeData({ ...employeeData, email: e.target.value })
+                  }
+                  placeholder="Enter email"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <div className="mt-4">
+                <Input
+                  id="phoneNumber"
+                  value={employeeData.phoneNumber}
+                  onChange={(e) =>
+                    setEmployeeData({ ...employeeData, phoneNumber: e.target.value })
+                  }
+                  placeholder="Enter phone number"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="project">Project</Label>
+              <div className="mt-4">
+                <Input
+                  id="project"
+                  value={employeeData.project}
+                  onChange={(e) =>
+                    setEmployeeData({ ...employeeData, project: e.target.value })
+                  }
+                  placeholder="Enter project name"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAddMemberOpen(false)}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={loading}>
+                Add Employee
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
