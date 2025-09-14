@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -156,7 +156,9 @@ export default function DepartmentTable() {
   const [departmentId, setDepartmentId] = useState("");
   const [departmentName, setDepartmentName] = useState("");
   const [open, setOpen] = useState(false);
+  const isMounted = useRef(false);
 
+  // Initialize table at the top of the component
   const table = useReactTable({
     data,
     columns,
@@ -176,12 +178,11 @@ export default function DepartmentTable() {
     },
   });
 
-  
   useEffect(() => {
-    let isMounted = true; // Flag to prevent state updates on unmounted component
+    isMounted.current = true;
 
     const fetchDepartments = async () => {
-      if (authLoading || !token) {
+      if (authLoading || !token || !isMounted.current) {
         setComponentLoading(true);
         return;
       }
@@ -193,15 +194,15 @@ export default function DepartmentTable() {
             "Content-Type": "application/json",
           },
         });
-        if (isMounted) {
+        if (isMounted.current) {
           setData(response.data);
         }
       } catch (error) {
-        if (isMounted) {
+        if (isMounted.current) {
           toast.error("Failed to fetch departments");
         }
       } finally {
-        if (isMounted) {
+        if (isMounted.current) {
           setComponentLoading(false);
         }
       }
@@ -209,13 +210,11 @@ export default function DepartmentTable() {
 
     fetchDepartments();
 
-    // Cleanup function to avoid state updates on unmount
     return () => {
-      isMounted = false;
+      isMounted.current = false;
     };
   }, [token, authLoading]);
 
-  // Handle adding new department
   const handleAddDepartment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
@@ -324,7 +323,6 @@ export default function DepartmentTable() {
             </form>
           </DialogContent>
         </Dialog>
-        
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -373,6 +371,7 @@ export default function DepartmentTable() {
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
+       
       </div>
     </div>
   );

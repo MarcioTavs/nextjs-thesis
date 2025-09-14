@@ -1,4 +1,5 @@
-"use client";
+// src/app/department/page.tsx
+"use client"
 
 import {
   Breadcrumb,
@@ -17,16 +18,20 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/components/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { CalendarDemo } from "@/components/calendar";
-import { Button } from "@/components/ui/button";
-import { CirclePlay, Coffee, Square, TimerOff } from "lucide-react";
-import axios from "axios";
-import { toast } from "sonner";
 import DepartmentTable from "@/components/department/departmentTable";
 
 export default function Page() {
+  const { loading: authLoading } = useAuth();
+  const [isClient, setIsClient] = useState(false);
 
- 
+  // Ensure component only renders on client side after mount
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient || authLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <SidebarProvider>
@@ -51,16 +56,10 @@ export default function Page() {
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid auto-rows-min gap-4 md:grid-cols-1">
             <DepartmentTable />
-            {/* <div className="bg-muted/50 aspect-video rounded-xl"></div>
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" /> */}
-             <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+            <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
           </div>
-          {/* <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
-          <DepartmentTable /> */}
         </div>
       </SidebarInset>
     </SidebarProvider>
-  
   );
 }
