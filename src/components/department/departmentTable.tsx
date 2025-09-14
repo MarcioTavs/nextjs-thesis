@@ -114,6 +114,7 @@ export const columns: ColumnDef<Department>[] = [
     cell: ({ row }) => {
       const department = row.original;
       return (
+        <div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -140,6 +141,7 @@ export const columns: ColumnDef<Department>[] = [
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       );
     },
   },
@@ -247,7 +249,7 @@ export default function DepartmentTable() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full ">
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter departments..."
@@ -325,7 +327,7 @@ export default function DepartmentTable() {
         </Dialog>
       </div>
       <div className="overflow-hidden rounded-md border">
-        <Table>
+        <Table className="bg-muted/50">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
