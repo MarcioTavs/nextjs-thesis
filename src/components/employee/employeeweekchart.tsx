@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useEffect, useState } from "react";
 import { Bar, BarChart, XAxis } from "recharts";
@@ -15,7 +15,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { getToken, useAuthRedirect } from "@/lib/auth"; 
+import { getToken, useAuthRedirect } from "@/lib/auth";
+import axios from "axios";
 
 interface DailyTimesheet {
   workedHours: number;
@@ -31,7 +32,7 @@ interface WeeklyTimesheet {
 const chartConfig = {
   worked: {
     label: "Worked",
-    color: "#4CAF50" ,
+    color: "#4CAF50",
   },
   breakTime: {
     label: "Break",
@@ -54,19 +55,21 @@ export default function WeeklyTimesheetChart() {
         throw new Error("No authentication token found");
       }
 
-      const response = await fetch("http://localhost:8080/api/attendance/weeklyReport?startDate=2025-09-04", {
-        method: "GET",
+      // Dynamic startDate: Start of current week (Monday)
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)); // Adjust to Monday
+      const startDate = startOfWeek.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+      const response = await axios.get(`http://localhost:8080/api/attendance/weeklyReport?startDate=${startDate}`, {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch weekly report");
-      }
-
-      const data: WeeklyTimesheet = await response.json();
+      const data: WeeklyTimesheet = response.data;
       setTimesheet(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -110,9 +113,10 @@ export default function WeeklyTimesheetChart() {
   });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Weekly Timesheet </CardTitle>
+    <div className="h-full w-full px-12">
+    
+      <CardHeader className="pb-4 pt-6 ">
+        <CardTitle>Weekly Timesheet</CardTitle>
         <CardDescription>Worked and break time per day (in minutes).</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-row gap-8">
@@ -143,6 +147,8 @@ export default function WeeklyTimesheetChart() {
           </BarChart>
         </ChartContainer>
       </CardContent>
-    </Card>
+      
+
+    </div>
   );
 }

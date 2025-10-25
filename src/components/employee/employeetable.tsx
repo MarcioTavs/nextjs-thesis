@@ -8,7 +8,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getToken, useAuthRedirect } from "@/lib/auth"; // Adjust the import path based on your project structure
+import {
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+
+import { getToken, useAuthRedirect } from "@/lib/auth";
+import axios from "axios";
+import { Card } from "../ui/card";
 
 interface DailyTimesheet {
   workedHours: number;
@@ -23,7 +31,7 @@ interface WeeklyTimesheet {
 
 function formatTime(minutes: number) {
   const hrs = Math.floor(minutes / 60);
-  const mins = Math.round(minutes % 60); // Round to nearest whole minute
+  const mins = Math.round(minutes % 60);
   return `${hrs}h ${mins}m`;
 }
 
@@ -34,37 +42,41 @@ export default function WeeklyTimesheetTable() {
 
   useAuthRedirect();
 
-  useEffect(() => {
-    const fetchTimesheet = async () => {
-      try {
-        const token = getToken();
+  const fetchTimesheet = async () => {
+    try {
+      const token = getToken();
 
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
-
-        const response = await fetch("http://localhost:8080/api/attendance/weeklyReport?startDate=2025-09-04", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch weekly report");
-        }
-
-        const data: WeeklyTimesheet = await response.json();
-        setTimesheet(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
-      } finally {
-        setLoading(false);
+      if (!token) {
+        throw new Error("No authentication token found");
       }
-    };
 
+      // Dynamic startDate: Start of current week (Monday)
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)); // Adjust to Monday
+      const startDate = startOfWeek.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+      const response = await axios.get(`http://localhost:8080/api/attendance/weeklyReport?startDate=${startDate}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data: WeeklyTimesheet = response.data;
+      setTimesheet(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unknown error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchTimesheet();
+    const interval = setInterval(fetchTimesheet, 60000); // Refresh every 60 seconds
+    return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
   if (loading) {
@@ -86,11 +98,16 @@ export default function WeeklyTimesheetTable() {
   );
 
   return (
+    <div className="h-full w-full px-12">
+      <CardHeader className="pt-12 pb-6">
+        <CardTitle>Weekly Timesheet</CardTitle>
+        <CardDescription>Your weekly timesheet report</CardDescription>
+      </CardHeader>
     <Table>
       <TableCaption>Your weekly timesheet report</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead>Day</TableHead>
+          <TableHead>Metric</TableHead>
           {sortedDays.map((day) => (
             <TableHead key={day}>{day}</TableHead>
           ))}
@@ -117,5 +134,6 @@ export default function WeeklyTimesheetTable() {
         </TableRow>
       </TableBody>
     </Table>
+    </div>
   );
 }

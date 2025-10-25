@@ -21,8 +21,11 @@ import { Button } from "@/components/ui/button";
 import { CirclePlay, Coffee, Square, TimerOff } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import Employeetable from "@/components/employeetable";
-import ChartTooltipDefault from "@/components/employeeweekchart";
+import Employeetable from "@/components/employee/employeetable";
+import ChartTooltipDefault from "@/components/employee/employeeweekchart";
+import Timesheet from "@/components/admin/timesheet";
+import ActiveEmployee from "@/components/admin/activeEmp";
+import { Card } from "@/components/ui/card";
 
 export default function Page() {
   const { role, loading, token } = useAuth();
@@ -268,12 +271,15 @@ export default function Page() {
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <Card className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min pt-0" >  
+            <ActiveEmployee />
+              </Card>
+                <Card className="w-full h-full p-4 bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min">
+            <Timesheet/>
+              </Card>
+                 
+        </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
@@ -329,15 +335,14 @@ export default function Page() {
 
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24" >  
+          <Card className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min pt-0" >  
             <Employeetable />
-              </div>
-                <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-24">
-                <ChartTooltipDefault/>
-             </div>
-        </div>
+              </Card>
 
-        
+            <Card className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min pt-0" >
+                <ChartTooltipDefault/>
+             </Card>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
