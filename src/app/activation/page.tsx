@@ -1,15 +1,17 @@
 'use client';
-
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import axios from 'axios';
 
-export default function ActivationPage() {
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+function ActivationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const email = searchParams.get('email') || '';
-
+  
   const [apiKey, setApiKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ text: string; success: boolean }>({
@@ -21,13 +23,12 @@ export default function ActivationPage() {
     e.preventDefault();
     setMsg({ text: '', success: false });
     setLoading(true);
-
+    
     try {
       await axios.post('http://localhost:8080/api/employee/activate-account', {
         email,
         apiKey,
       });
-
       setMsg({ text: 'Account activated successfully!', success: true });
       setTimeout(() => {
         router.push(`/profile?email=${encodeURIComponent(email)}`);
@@ -58,7 +59,6 @@ export default function ActivationPage() {
         <p className="text-gray-300 text-center">
           Please enter the API key sent to your email to activate your account.
         </p>
-
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
           <input
             type="text"
@@ -76,7 +76,6 @@ export default function ActivationPage() {
             {loading ? 'Activating...' : 'Activate Account'}
           </button>
         </form>
-
         {msg.text && (
           <div
             className={`text-center ${
@@ -88,5 +87,17 @@ export default function ActivationPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ActivationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
+        Loading activation...
+      </div>
+    }>
+      <ActivationContent />
+    </Suspense>
   );
 }
