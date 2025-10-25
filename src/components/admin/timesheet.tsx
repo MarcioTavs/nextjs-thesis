@@ -62,7 +62,7 @@ export default function Timesheet() {
         <CardDescription>Weekly timesheet report for all employees</CardDescription>
       </CardHeader>
     <Table>
-      <TableCaption>Weekly Timesheet for Employees (Sep 9 - Sep 15, 2025)</TableCaption>
+      <TableCaption>Weekly Timesheet for Employees (Sep 15 - Sep 21, 2025)</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead className="w-[150px]">Name</TableHead>

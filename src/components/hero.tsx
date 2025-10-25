@@ -17,13 +17,22 @@ export default function Hero() {
               The ultimate time tracking solution for businesses. Forever FREE for unlimited users.
             </p>
             <div className="relative flex items-center mx-auto mt-12 overflow-hidden text-left border border-gray-700 rounded-md md:max-w-md md:text-center">
+            
               <span className="relative top-0 right-0 block">
                 <Link href="/register">
                   <button className="inline-flex items-center justify-center w-32 h-12 px-8 text-base font-bold leading-6 text-white transition duration-150 ease-in-out bg-gray-800 border border-transparent hover:bg-gray-700 focus:outline-none active:bg-gray-700">
-                    Sign Up
+                    Sign Up 
                   </button>
                 </Link>
+
               </span>
+              
+                <input 
+                type="email" 
+                placeholder="Enter your email"
+                className="flex-1 w-full h-12 px-4 text-base text-white bg-transparent border-0 focus:outline-none focus:ring-0 placeholder-gray-400"
+              />
+
             </div>
             <div className="mt-8 text-sm text-gray-300">By signing up, you agree to our terms and services.</div>
           </div>
