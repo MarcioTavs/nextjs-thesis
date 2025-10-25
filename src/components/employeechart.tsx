@@ -23,7 +23,7 @@ function formatTime(minutes: number) {
   return `${hrs}h ${mins}m`;
 }
 
-export default function EmployeeChart({
+function EmployeeChart({
   data,
 }: {
   data: { month: string; workTime: number; breakTime: number; overtimeTime?: number }[];
@@ -100,3 +100,5 @@ export default function EmployeeChart({
     </Card>
   );
 }
+
+ export default EmployeeChart
