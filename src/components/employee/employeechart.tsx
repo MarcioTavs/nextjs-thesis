@@ -101,4 +101,4 @@ function EmployeeChart({
   );
 }
 
- export default EmployeeChart
+ export default EmployeeChart;

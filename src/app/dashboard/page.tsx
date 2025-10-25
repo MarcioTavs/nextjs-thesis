@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { CirclePlay, Coffee, Square, TimerOff } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import EmployeeChart from "@/components/employeechart";
+import EmployeeChart from "@/components/employee/employeechart";
 import ProfileCard from "@/components/profileCard";
 import DepartmentCard from "@/components/departmentCard";
 import ActiveEmployee from "@/components/admin/activeEmp";
